@@ -18,7 +18,10 @@ I performed feature selection in three distinct ways to practice different techn
 
 Through this triangulation, I observed consistent results across methods, ultimately confirming which features (like `size`) to drop based on cross-validated evidence.
 
-### 3. Model Diagnostics & Validation
+### 3. Hypothesis Testing (Log Transformation)
+I noticed heteroscedasticity (increasing variance) and positive skew in the target variable. To address this, I ran an experiment comparing a standard linear model to a log-transformed model side-by-side, analyzing the metrics and residual distributions to make an informed, data-driven decision on which model to proceed with.
+
+### 4. Model Diagnostics & Validation
 A model is only as good as its assumptions. I evaluated the final model using robust statistical diagnostics:
 - **Actual vs. Fitted Plots:** Visualizing the model's predictions against real data on both training and test sets.
 - **Residual Analysis:** Plotting residuals vs. predicted values to check for homoscedasticity (constant variance of errors) and using KDE plots to verify the normal distribution of residuals.
@@ -27,12 +30,13 @@ A model is only as good as its assumptions. I evaluated the final model using ro
 
 The project is structured into a series of Jupyter Notebooks that document my step-by-step workflow:
 
-- `1-data-analyze.ipynb`: Initial data loading, cleaning, and understanding.
-- `2-data-preprocessing.ipynb`: Handling missing values, outliers, and encoding categorical variables.
-- `3-multivariate-data-analysis.ipynb`: Deep dive into Exploratory Data Analysis (EDA) and visualization.
-- `4-feature-selection-by-LassoRegression.ipynb`: Feature selection using L1 regularization.
-- `5-feature-selection-by-adjusted-r2.ipynb`: Feature selection using Adjusted R² metrics.
-- `6-model-training.ipynb`: Final model training, evaluation, and residual diagnostics.
+- `1-data-analyze.ipynb`: Initial data loading, inspection, and checking for missing values or duplicates.
+- `2-univariate-data-analysis.ipynb`: Analyzing features individually to understand their shapes, structures, and overall distributions.
+- `3-multivariate-data-analysis.ipynb`: Exploring relationships between multiple features and the target variable to guide feature selection.
+- `4-feature-selection-by-LassoRegression.ipynb`: Using a custom Lasso Regression algorithm and hyperparameter tuning to filter out useless features.
+- `5-feature-selection-by-adjusted-r2.ipynb`: Iteratively evaluating features using Adjusted R² to mathematically confirm which features add predictive power.
+- `6-log-transformation-comparison.ipynb`: Comparing a regular linear model against a log-transformed model to address heteroscedasticity and positive skew.
+- `7-model-training.ipynb`: Training the final Ordinary Least Squares (OLS) regression model and performing rigorous residual analysis (Q-Q plots, KDE).
 
 ## 🛠️ Technologies Used
 - **Python 3**
