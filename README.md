@@ -1,6 +1,6 @@
 # Tips Dataset Regression Analysis
 
-This is my first machine learning project, created to solidify my understanding of Linear Regression. Rather than just applying black-box models, I built the foundational algorithms from scratch to deeply understand the underlying mathematics and mechanics of linear regression, feature selection, and model evaluation.
+This is my first machine learning project, created to solidify my understanding of Linear Regression. Rather than just applying black-box models, I built the foundational algorithms from scratch to deeply understand the underlying mathematics and mechanics of linear regression, feature selection, and model evaluation—before translating the workflow into a clean, production-grade **scikit-learn** pipeline.
 
 ## 🎯 Project Objective
 The goal of this project is to predict the **tip amount** given at a restaurant based on various dining features (total bill, sex, smoker, day, time, size) using the classic `tips` dataset from Seaborn.
@@ -25,24 +25,89 @@ I noticed heteroscedasticity (increasing variance) and positive skew in the targ
 A model is only as good as its assumptions. I evaluated the final model using robust statistical diagnostics:
 - **Actual vs. Fitted Plots:** Visualizing the model's predictions against real data on both training and test sets.
 - **Residual Analysis:** Plotting residuals vs. predicted values to check for homoscedasticity (constant variance of errors) and using KDE plots to verify the normal distribution of residuals.
+- **Q-Q Plots:** Assessing the normality of residuals against theoretical normal quantiles.
+
+### 5. Production Pipeline & Model Serialization
+After exploring and proving the math from scratch, I bridged the gap to production machine learning engineering:
+- **Scikit-Learn Pipeline:** Combined `ColumnTransformer`, `StandardScaler`, and `SelectFromModel(Lasso)` into an encapsulated, leak-free pipeline.
+- **Automated Hyperparameter Tuning:** Used 5-fold cross-validation with `GridSearchCV` to locate the optimal regularization penalty.
+- **Post-Lasso Modeling:** Refit an unpenalized `LinearRegression` model on the selected features to eliminate shrinkage bias.
+- **Standalone Script & Serialization:** Packaged the workflow into `src/model_training.py` and exported the complete trained pipeline via `joblib` for inference.
+
+---
 
 ## 📂 Project Structure
 
-The project is structured into a series of Jupyter Notebooks that document my step-by-step workflow:
+```text
+├── notebooks/
+│   ├── 1-data-analyze.ipynb                      # Data inspection, missing values, duplicates
+│   ├── 2-univariate-data-analysis.ipynb          # Distribution and outlier analysis per feature
+│   ├── 3-multivariate-data-analysis.ipynb        # Correlation and relationship exploration
+│   ├── 4-feature-selection-by-LassoRegression.ipynb # Custom from-scratch Lasso & alpha tuning
+│   ├── 5-feature-selection-by-adjusted-r2.ipynb  # Stepwise feature selection with Adjusted R²
+│   ├── 6-log-transformation-comparison.ipynb     # Evaluating log transform vs raw target
+│   ├── 7-model-training.ipynb                    # Final manual OLS model & diagnostic plots
+│   └── 8-scikit-learn-version.ipynb              # Production sklearn pipeline & GridSearchCV
+├── src/
+│   └── model_training.py                         # Standalone script to train & export the pipeline
+├── model/
+│   └── model.joblib                              # Serialized trained pipeline artifact
+├── utils.py                                      # Custom math implementations (OLS, metrics)
+└── requirements.txt                              # Project dependencies
+```
 
-- `1-data-analyze.ipynb`: Initial data loading, inspection, and checking for missing values or duplicates.
-- `2-univariate-data-analysis.ipynb`: Analyzing features individually to understand their shapes, structures, and overall distributions.
-- `3-multivariate-data-analysis.ipynb`: Exploring relationships between multiple features and the target variable to guide feature selection.
-- `4-feature-selection-by-LassoRegression.ipynb`: Using a custom Lasso Regression algorithm and hyperparameter tuning to filter out useless features.
-- `5-feature-selection-by-adjusted-r2.ipynb`: Iteratively evaluating features using Adjusted R² to mathematically confirm which features add predictive power.
-- `6-log-transformation-comparison.ipynb`: Comparing a regular linear model against a log-transformed model to address heteroscedasticity and positive skew.
-- `7-model-training.ipynb`: Training the final Ordinary Least Squares (OLS) regression model and performing rigorous residual analysis (Q-Q plots, KDE).
+---
+
+## ⚙️ How to Run & Use the Model
+
+### 1. Installation
+Clone the repository and install the required dependencies:
+```bash
+git clone https://github.com/<your-username>/tips-dataset-regression.git
+cd tips-dataset-regression
+pip install -r requirements.txt
+```
+
+### 2. Train and Export the Model
+To retrain the pipeline and export the model artifact to `model/model.joblib`:
+```bash
+python src/model_training.py
+```
+
+### 3. Inference with the Saved Pipeline
+Because the entire preprocessing, feature selection, and regression steps are encapsulated in the serialized pipeline, you can feed **raw customer data** directly:
+
+```python
+import joblib
+import pandas as pd
+
+# Load the trained pipeline
+pipeline = joblib.load('model/model.joblib')
+
+# Sample raw customer input
+new_customer = pd.DataFrame([{
+    'total_bill': 25.50,
+    'sex': 'Male',
+    'smoker': 'No',
+    'day': 'Sun',
+    'time': 'Dinner',
+    'size': 3
+}])
+
+# Predict tip
+predicted_tip = pipeline.predict(new_customer)
+print(f"Predicted Tip: ${predicted_tip[0]:.2f}")
+```
+
+---
 
 ## 🛠️ Technologies Used
 - **Python 3**
-- **NumPy & Pandas:** Data manipulation and custom algorithm implementation.
-- **Matplotlib & Seaborn:** Data visualization and model diagnostics.
-- **Scikit-Learn:** Data splitting and Lasso Regression.
+- **NumPy & Pandas:** Data manipulation and custom algorithm implementations.
+- **Matplotlib & Seaborn:** Data visualization and statistical diagnostics.
+- **Scikit-Learn:** Modern ML pipelines (`ColumnTransformer`, `StandardScaler`, `GridSearchCV`, `SelectFromModel`, `LinearRegression`).
+- **SciPy:** Statistical checks and Q-Q plots.
+- **Joblib:** Production model serialization.
 
 ## 💡 Conclusion
-This project served as a comprehensive introduction to machine learning. By manually implementing regression math and methodically testing different feature selection techniques, I gained a strong, intuitive understanding of how linear models work, how to evaluate them, and why checking statistical assumptions is crucial.
+This project served as a comprehensive introduction to machine learning. By first implementing regression math and feature selection from scratch, and subsequently engineering an end-to-end `scikit-learn` pipeline, I gained both a deep theoretical understanding and practical software engineering skills for building production-ready linear models.
